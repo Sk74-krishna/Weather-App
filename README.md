@@ -30,4 +30,4 @@ A simple and responsive weather app built using **HTML, CSS, and JavaScript** in
 1. Clone or download this repository:
 
 ```bash
-git clone https://github.com/yourusername/weather-app.git
+git clone https://github.com/Sk74-krishna//Weather-App.git
