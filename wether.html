@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #6dd5ed, #2193b0);
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .weather-box {
+      background-color: rgba(255, 255, 255, 0.2);
+      padding: 25px;
+      border-radius: 10px;
+      margin-top: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type="text"] {
+      padding: 12px;
+      width: 70%;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 20px;
+      background-color: #fff;
+      color: #2193b0;
+      border: none;
+      border-radius: 5px;
+      margin-left: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background-color: #e0f7fa;
+      transform: translateY(-2px);
+    }
+
+    .result {
+      margin-top: 25px;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .weather-icon {
+      width: 80px;
+      height: 80px;
+      margin: 10px auto;
+      display: block;
+    }
+
+    .loading {
+      display: none;
+      margin: 20px auto;
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error {
+      color: #ffdddd;
+      background-color: rgba(255, 0, 0, 0.2);
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌤 Weather App</h1>
+    <div class="weather-box">
+      <input type="text" id="cityInput" placeholder="Enter city name" />
+      <button id="searchBtn">🔍 Search Weather</button>
+      <div class="loading" id="loadingSpinner"></div>
+      <div class="result" id="weatherResult"></div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("searchBtn").addEventListener("click", getWeather);
+    document.getElementById("cityInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        getWeather();
+      }
+    });
+
+    async function getWeather() {
+      const city = document.getElementById("cityInput").value.trim();
+      if (!city) {
+        showError("Please enter a city name");
+        return;
+      }
+
+      const resultDiv = document.getElementById("weatherResult");
+      const spinner = document.getElementById("loadingSpinner");
+      
+      // Show loading spinner
+      resultDiv.innerHTML = "";
+      spinner.style.display = "block";
+      
+      try {
+        const apiKey = "YOUR_API_KEY"; // Your WeatherAPI.com key
+
+        const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}&aqi=no`;
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("City not found or API error");
+        }
+        
+        const data = await response.json();
+        displayWeather(data);
+      } catch (error) {
+        showError(error.message);
+      } finally {
+        spinner.style.display = "none";
+      }
+    }
+
+    function displayWeather(data) {
+      const { location, current } = data;
+      const resultDiv = document.getElementById("weatherResult");
+      
+      resultDiv.innerHTML = `
+        <h2>${location.name}, ${location.country}</h2>
+        <img class="weather-icon" src="${current.condition.icon}" alt="${current.condition.text}">
+        <p>🌡 Temperature: ${current.temp_c}°C (Feels like ${current.feelslike_c}°C)</p>
+        <p>☁ Condition: ${current.condition.text}</p>
+        <p>💧 Humidity: ${current.humidity}%</p>
+        <p>🌬 Wind: ${current.wind_kph} km/h</p>
+        <p>🕒 Last updated: ${new Date(current.last_updated).toLocaleString()}</p>
+      `;
+    }
+
+    function showError(message) {
+      const resultDiv = document.getElementById("weatherResult");
+      resultDiv.innerHTML = `<div class="error">${message}</div>`;
+    }
+
+    // Load default weather on page load
+    window.onload = function() {
+      document.getElementById("cityInput").value = "London";
+      getWeather();
+    };
+  </script>
+</body>
+</html>
